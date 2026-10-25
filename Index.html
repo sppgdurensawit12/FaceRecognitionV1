@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Absensi Wajah SPPG</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+<style>
+:root{--navy:#1F2A44;--gold:#E2BC63;--gold-d:#C9A24B;--bg:#F6F4EE;--card:#fff;--line:#DAD6C8;--mut:#4A5368;--ok:#1E5B36;--okbg:#E3F2E8;--warn:#5A4410;--warnbg:#FBF3DD;--bad:#8A1F1F;--badbg:#FBE5E5}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--navy);font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-text-size-adjust:100%}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.scr{display:none;flex:1;flex-direction:column;padding:24px 20px 20px;gap:14px}
+.scr.on{display:flex}
+h1{margin:0;font-size:24px;line-height:1.25;font-weight:800}
+h2{margin:0;font-size:15px;font-weight:800}
+p{margin:0;font-size:13.5px;line-height:1.5;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.row{display:flex;align-items:center;gap:10px}
+.sp{justify-content:space-between}
+.col{display:flex;flex-direction:column;gap:8px}
+.grow{flex:1}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:700}
+input[type=text],input[type=password],input[type=tel],select,textarea{font:inherit;font-size:15px;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-d);outline-offset:1px}
+button{font:inherit;cursor:pointer}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:14px;border:0;background:var(--navy);color:#fff;font-weight:700;font-size:15px;width:100%}
+.btn.sec{background:transparent;border:1.5px solid var(--navy);color:var(--navy);height:46px;font-size:14px;font-weight:600}
+.btn.gold{background:var(--gold);color:#1B1402}
+.btn.sm{height:38px;font-size:12.5px;border-radius:10px;width:auto;padding:0 12px}
+.btn.danger{background:var(--badbg);color:var(--bad);border:1.5px solid #E5B5B5}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--okbg);color:var(--ok)}
+.chip.w{background:var(--warnbg);color:var(--warn)}
+.chip.b{background:var(--badbg);color:var(--bad)}
+.note{display:flex;gap:10px;background:var(--warnbg);border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.45;color:var(--warn)}
+.err{background:var(--badbg);color:var(--bad);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;display:none}
+.err.on{display:block}
+.ck{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.ck input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--navy)}
+.ck b{font-size:14px}.ck span span{display:block;font-size:12.5px;line-height:1.45;color:var(--mut);margin-top:2px}
+.hdr{background:var(--navy);color:#fff;margin:-24px -20px 0;padding:24px 20px 64px;border-radius:0 0 28px 28px}
+.hdr small{color:#C9D0E0;font-size:13px}.hdr h1{font-size:22px;margin-top:2px}.hdr .d{color:var(--gold);font-size:12.5px;font-weight:600;margin-top:4px}
+.clock{margin:-48px 0 0;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;text-align:center}
+.clock .t{font-size:46px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+.clock .d{font-size:12.5px;font-weight:600;color:var(--mut)}
+.big{height:72px;font-size:18px;font-weight:800;border-radius:18px}
+.nav{margin-top:auto;position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
+.nav button{background:none;border:0;min-width:64px;min-height:48px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:600;color:#5B6478}
+.nav button.on{color:var(--navy);font-weight:800}
+.cam{position:relative;width:250px;height:292px;margin:4px auto}
+.cam .v{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#1B2236;border:5px solid var(--navy)}
+.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cam .ring{position:absolute;inset:-12px;border-radius:50%;border:3px dashed var(--gold-d);pointer-events:none}
+.cam.ok .ring{border-style:solid;border-color:var(--gold)}
+.dark{background:#0E1424;color:#fff}
+.dark p,.dark .mut{color:#B9C1D6}
+.pb{height:6px;border-radius:999px;background:#28324E;overflow:hidden}.pb i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.dots{display:flex;gap:10px;justify-content:center}.dots i{width:12px;height:12px;border-radius:50%;background:#CFCBBB}.dots i.on{background:var(--navy)}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #ECE8DB;font-size:14px;font-weight:700}
+.kv:last-child{border:0}.kv span:first-child{font-size:13px;color:var(--mut);font-weight:600}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.tabs button{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--mut)}
+.tabs button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.mod{position:fixed;inset:0;background:rgba(14,20,36,.7);display:none;align-items:center;justify-content:center;padding:20px;z-index:9}
+.mod.on{display:flex}.mod .box{background:#fff;border-radius:16px;padding:14px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:10px}
+.mod img{width:100%;border-radius:10px}
+.sum{display:flex;gap:8px}.sum .card{flex:1;text-align:center;padding:10px}.sum b{font-size:22px;display:block}.sum span{font-size:11.5px;color:var(--mut);font-weight:600}
+.sm-t{font-size:12px;color:var(--mut)}
+.load{position:fixed;inset:0;background:rgba(246,244,238,.85);display:none;align-items:center;justify-content:center;font-weight:700;z-index:10}.load.on{display:flex}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- LOGIN -->
+<section class="scr" id="s-login">
+  <div class="row" style="margin-top:20px"><div style="width:40px;height:40px;border-radius:11px;background:var(--navy);display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E2BC63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></div><b id="l-sppg">Absensi SPPG</b></div>
+  <h1 style="margin-top:12px">Masuk</h1>
+  <p>Gunakan ID relawan dan PIN 6 angka dari admin. Akun akan terikat ke HP ini.</p>
+  <div class="err" id="l-err"></div>
+  <label class="f">ID Relawan<input type="text" id="l-id" autocomplete="username" autocapitalize="off"></label>
+  <label class="f">PIN<input type="password" id="l-pin" inputmode="numeric" maxlength="6" autocomplete="current-password"></label>
+  <button class="btn" id="l-go" style="margin-top:6px">Masuk</button>
+</section>
+
+<!-- PERSETUJUAN -->
+<section class="scr" id="s-consent">
+  <div class="row sp"><b style="font-size:15px">Absensi SPPG</b><span class="sm-t">Langkah 1 dari 3</span></div>
+  <h1>Persetujuan Data Wajah</h1>
+  <p>Wajah Anda adalah data biometrik. Kami hanya memprosesnya dengan persetujuan Anda, untuk memastikan absensi dilakukan oleh Anda sendiri. Centang sendiri tiap butir yang Anda setujui.</p>
+  <label class="ck"><input type="checkbox" id="c-face"><span><b>Template wajah</b><span>Dibuat dari foto pendaftaran untuk mencocokkan wajah saat absen. Foto pendaftaran tidak disimpan. Wajah hanya dibandingkan dengan wajah Anda sendiri.</span></span></label>
+  <label class="ck"><input type="checkbox" id="c-selfie"><span><b>Foto selfie saat absen</b><span>Disimpan <span id="c-days" style="display:inline">90</span> hari sebagai bukti kehadiran, hanya dilihat admin.</span></span></label>
+  <label class="ck"><input type="checkbox" id="c-gps"><span><b>Lokasi GPS saat absen</b><span>Hanya dicatat saat Anda menekan absen, tidak dilacak terus-menerus.</span></span></label>
+  <label class="ck"><input type="checkbox" id="c-google"><span><b>Penyimpanan di layanan Google</b><span>Pusat data Google dapat berada di luar Indonesia.</span></span></label>
+  <div class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6E5313" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg><span>Persetujuan bersifat sukarela. Jika wajah tidak dicentang, Anda tetap bisa absen dengan verifikasi manual oleh koordinator. Persetujuan bisa ditarik kapan saja di menu Profil. Surat persetujuan tertulis tetap perlu ditandatangani.</span></div>
+  <div class="err" id="c-err"></div>
+  <div class="col" style="margin-top:auto">
+    <button class="btn" id="c-ok">Setuju &amp; Lanjut</button>
+    <button class="btn sec" id="c-no">Lanjut tanpa data wajah (absen manual)</button>
+    <button class="btn sec" id="c-out" style="border-color:var(--line);color:var(--mut)">Keluar</button>
+  </div>
+</section>
+
+<!-- DAFTAR WAJAH -->
+<section class="scr dark" id="s-enroll" style="margin:0">
+  <div class="row sp"><button class="btn sm" id="e-back" style="background:#1E2740">Kembali</button><span class="mut" style="font-size:12px;font-weight:600">Langkah 2 dari 3</span></div>
+  <h1 id="e-title">Daftarkan Wajah Anda</h1>
+  <p>Cukup sekali. Ambil 5 foto dari sudut sedikit berbeda. Foto tidak disimpan, hanya template wajah (angka).</p>
+  <div class="cam" id="e-cam"><div class="v"><video id="e-vid" playsinline muted></video></div><div class="ring"></div></div>
+  <div class="row" style="justify-content:center"><span class="chip w" id="e-st">Memuat kamera...</span></div>
+  <div class="dots" id="e-dots"><i></i><i></i><i></i><i></i><i></i></div>
+  <div style="text-align:center;font-size:13px;font-weight:700" id="e-prompt">&nbsp;</div>
+  <div class="err" id="e-err"></div>
+  <div class="col" style="margin-top:auto"><button class="btn gold" id="e-shot" disabled>Ambil Foto</button></div>
+</section>
+
+<!-- BERANDA -->
+<section class="scr" id="s-home">
+  <div class="hdr"><small id="h-hi">Selamat datang,</small><h1 id="h-nama">-</h1><div class="d" id="h-div">-</div></div>
+  <div class="clock"><div class="d" id="h-date">-</div><div class="t" id="h-time">--.--</div><span class="chip w" id="h-shift">Shift</span></div>
+  <div class="row">
+    <div class="card grow" style="padding:10px 12px"><div class="sm-t">Masuk</div><b id="h-in" style="font-size:15px">Belum absen</b></div>
+    <div class="card grow" style="padding:10px 12px"><div class="sm-t">Pulang</div><b id="h-out" style="font-size:15px">Belum absen</b></div>
+  </div>
+  <div class="err" id="h-err"></div>
+  <button class="btn big" id="h-go"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E2BC63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2"/><circle cx="12" cy="11" r="2.6"/><path d="M7.5 17c.8-2.2 2.4-3.2 4.5-3.2s3.7 1 4.5 3.2"/></svg><span id="h-go-t">Absen Masuk</span></button>
+  <div id="h-manual" class="note" style="display:none"><span>Anda memakai mode tanpa data wajah. Absen akan berstatus "Menunggu verifikasi" sampai disetujui koordinator.</span></div>
+  <h2>Riwayat terakhir</h2>
+  <div class="col" id="h-hist"></div>
+</section>
+
+<!-- SCAN -->
+<section class="scr dark" id="s-scan" style="margin:0">
+  <div class="row sp"><button class="btn sm" id="x-close" style="background:#1E2740">Tutup</button><span class="chip" id="x-geo">GPS...</span></div>
+  <div style="text-align:center"><div class="mut" style="font-size:12px;font-weight:600" id="x-sub">Absen</div><h1 id="x-title" style="margin-top:4px">Posisikan wajah</h1></div>
+  <div class="cam" id="x-cam"><div class="v"><video id="x-vid" playsinline muted></video></div><div class="ring"></div></div>
+  <div class="col">
+    <div class="row" style="background:#1E2740;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600" id="x-s1">1. Hadap lurus ke kamera</div>
+    <div class="row" style="background:#1E2740;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600" id="x-s2">2. Gerakan keamanan</div>
+    <div class="row" style="background:#1E2740;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600" id="x-s3">3. Verifikasi wajah</div>
+  </div>
+  <div class="err" id="x-err"></div>
+  <div class="col" style="margin-top:auto"><div class="pb"><i id="x-pb"></i></div><p style="text-align:center;font-size:12.5px">Proses pengenalan berjalan di HP Anda. Hanya angka vektor wajah yang dikirim.</p><button class="btn gold" id="x-retry" style="display:none">Coba lagi</button></div>
+</section>
+
+<!-- HASIL -->
+<section class="scr" id="s-done">
+  <div class="col" style="align-items:center;margin-top:40px;gap:12px"><div style="width:96px;height:96px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px #E9DDB5"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#E2BC63" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h1 id="d-title" style="text-align:center">Absen Berhasil</h1><p id="d-sub" style="text-align:center"></p></div>
+  <div class="card" style="padding:4px 16px" id="d-kv"></div>
+  <div class="col" style="margin-top:auto"><button class="btn" id="d-ok">Selesai</button></div>
+</section>
+
+<!-- PROFIL -->
+<section class="scr" id="s-prof">
+  <h1>Profil &amp; Hak Data</h1>
+  <div class="card" style="padding:4px 16px" id="p-kv"></div>
+  <div class="note"><span>Anda berhak mengakses, memperbaiki, menghapus, atau membatasi pemrosesan data Anda, dan menarik persetujuan kapan saja. Permintaan ditanggapi paling lambat 3 x 24 jam.</span></div>
+  <div class="err" id="p-err"></div>
+  <button class="btn sec" id="p-withdraw">Tarik persetujuan wajah (hapus template)</button>
+  <h2>Ajukan permintaan ke admin</h2>
+  <select id="p-jenis"><option>Akses / salinan data saya</option><option>Perbaikan data saya</option><option>Penghapusan data saya</option><option>Pembatasan pemrosesan data saya</option><option>Keberatan atas hasil verifikasi wajah</option></select>
+  <textarea id="p-cat" rows="3" placeholder="Keterangan (boleh dikosongkan)"></textarea>
+  <button class="btn" id="p-send">Kirim Permintaan</button>
+  <button class="btn sec" id="p-out">Keluar</button>
+</section>
+
+<!-- ADMIN -->
+<section class="scr" id="s-admin">
+  <h1>Admin</h1>
+  <div class="tabs" id="a-tabs"><button data-t="today" class="on">Hari ini</button><button data-t="users">Relawan</button><button data-t="req" data-admin="1">Permintaan</button><button data-t="cfg" data-admin="1">Pengaturan</button></div>
+  <div class="err" id="a-err"></div>
+  <div id="a-body" class="col"></div>
+</section>
+
+<nav class="nav" id="nav" style="display:none">
+  <button data-go="home" class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/></svg>Beranda</button>
+  <button data-go="prof"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Profil</button>
+  <button data-go="admin" id="nav-admin" style="display:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z"/></svg>Admin</button>
+</nav>
+</div>
+
+<div class="mod" id="mod"><div class="box"><div id="mod-body"></div><button class="btn sec" id="mod-x">Tutup</button></div></div>
+<div class="load" id="load">Memproses...</div>
+
+<script>
+/* ============ util ============ */
+var $ = function (id) { return document.getElementById(id); };
+var S = { token: null, me: null, deviceId: null };
+var MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function uuid() { return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function showErr(id, m) { var e = $(id); e.textContent = m || ''; e.classList.toggle('on', !!m); }
+function busy(on) { $('load').classList.toggle('on', !!on); }
+
+function api(action, payload, noBusy) {
+  payload = payload || {};
+  payload.deviceId = S.deviceId;
+  if (!noBusy) busy(true);
+  return new Promise(function (res, rej) {
+    google.script.run
+      .withSuccessHandler(function (r) { busy(false); if (r && r.error) { if (r.code === 'AUTH') { doLogout(true); } rej(r); } else res(r); })
+      .withFailureHandler(function (e) { busy(false); rej({ error: (e && e.message) || 'Gagal terhubung ke server.' }); })
+      .api(action, S.token, payload);
+  });
+}
+
+function show(name) {
+  stopCam(); stopScan = true;
+  document.querySelectorAll('.scr').forEach(function (s) { s.classList.remove('on'); });
+  $('s-' + name).classList.add('on');
+  var inApp = ['home', 'prof', 'admin'].indexOf(name) >= 0;
+  $('nav').style.display = inApp ? 'flex' : 'none';
+  document.querySelectorAll('#nav button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-go') === name); });
+  document.body.style.background = (name === 'enroll' || name === 'scan') ? '#0E1424' : '';
+  window.scrollTo(0, 0);
+}
+
+/* ============ boot / login ============ */
+function boot() {
+  S.deviceId = lsGet('ds12_dev');
+  if (!S.deviceId) { S.deviceId = uuid(); lsSet('ds12_dev', S.deviceId); }
+  S.token = lsGet('ds12_tok');
+  if (S.token) {
+    api('me').then(function (me) { S.me = me; route(); }).catch(function () { show('login'); });
+  } else show('login');
+  setInterval(tick, 1000); tick();
+}
+
+$('l-go').onclick = function () {
+  showErr('l-err', '');
+  var id = $('l-id').value.trim(), pin = $('l-pin').value.trim();
+  if (!id || !pin) return showErr('l-err', 'ID dan PIN wajib diisi.');
+  api('login', { id: id, pin: pin }).then(function (r) {
+    S.token = r.token; S.me = r.me; lsSet('ds12_tok', S.token); $('l-pin').value = ''; route();
+  }).catch(function (e) { showErr('l-err', e.error); });
+};
+$('l-pin').onkeydown = function (e) { if (e.key === 'Enter') $('l-go').click(); };
+
+function doLogout(silent) {
+  var t = S.token;
+  if (!silent && t) api('logout', {}, true).catch(function () {});
+  S.token = null; S.me = null; lsDel('ds12_tok'); show('login');
+}
+
+function route() {
+  var m = S.me;
+  $('nav-admin').style.display = (m.role === 'admin' || m.role === 'koordinator') ? 'flex' : 'none';
+  $('c-days').textContent = m.cfg.selfieHari;
+  if (!m.consentOk) return openConsent();
+  if (m.mode === 'face' && !m.hasFace) return openEnroll();
+  renderHome();
+}
+
+/* ============ persetujuan ============ */
+function openConsent() {
+  ['c-face', 'c-selfie', 'c-gps', 'c-google'].forEach(function (id) { $(id).checked = false; });
+  showErr('c-err', ''); show('consent');
+}
+$('c-face').onchange = function () { if (!this.checked) $('c-selfie').checked = false; };
+$('c-selfie').onchange = function () { if (this.checked) $('c-face').checked = true; };
+function sendConsent(forceNoFace) {
+  var items = { face: !forceNoFace && $('c-face').checked, selfie: !forceNoFace && $('c-selfie').checked, gps: $('c-gps').checked, google: $('c-google').checked };
+  if (!items.gps || !items.google) return showErr('c-err', 'Lokasi GPS dan penyimpanan di Google perlu disetujui untuk memakai aplikasi. Jika tidak setuju, hubungi admin untuk absen manual.');
+  api('consent', { items: items }).then(function (me) { S.me = me; route(); }).catch(function (e) { showErr('c-err', e.error); });
+}
+$('c-ok').onclick = function () { sendConsent(false); };
+$('c-no').onclick = function () { sendConsent(true); };
+$('c-out').onclick = function () { doLogout(); };
+
+/* ============ kamera & face-api ============ */
+var stream = null, modelsReady = false, stopScan = false;
+function loadModels() {
+  if (modelsReady) return Promise.resolve();
+  if (typeof faceapi === 'undefined') return Promise.reject({ error: 'Pustaka pengenal wajah gagal dimuat. Periksa koneksi internet.' });
+  return Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+    faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
+    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+  ]).then(function () { modelsReady = true; }).catch(function () { throw { error: 'Model wajah gagal dimuat. Periksa koneksi internet.' }; });
+}
+function startCam(video) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject({ error: 'Browser tidak mendukung kamera. Buka lewat Chrome.' });
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 640 } }, audio: false }).then(function (s) {
+    stream = s; video.srcObject = s; return video.play();
+  }).catch(function () { throw { error: 'Kamera tidak bisa dibuka. Izinkan akses kamera di browser, lalu coba lagi.' }; });
+}
+function stopCam() { if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; } }
+function detect(video, withDesc) {
+  var t = faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })).withFaceLandmarks(true);
+  return withDesc ? t.withFaceDescriptor() : t;
+}
+function faceOK(r, video) { return r && (r.detection.box.width / video.videoWidth) > 0.3; }
+function pt(r) { return r.landmarks.positions; }
+function d2(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+function ear(p, i) { return (d2(p[i + 1], p[i + 5]) + d2(p[i + 2], p[i + 4])) / (2 * d2(p[i], p[i + 3])); }
+function eyeEAR(r) { var p = pt(r); return (ear(p, 36) + ear(p, 42)) / 2; }
+function yaw(r) { var p = pt(r); return (p[30].x - p[0].x) / (p[16].x - p[0].x); }
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function snap(video) {
+  var c = document.createElement('canvas'), w = 320, h = Math.round(320 * video.videoHeight / video.videoWidth);
+  c.width = w; c.height = h; c.getContext('2d').drawImage(video, 0, 0, w, h);
+  return c.toDataURL('image/jpeg', 0.6);
+}
+
+/* ============ daftar wajah ============ */
+var PROMPTS = ['Hadap lurus ke kamera', 'Putar wajah sedikit ke kiri', 'Putar wajah sedikit ke kanan', 'Angkat dagu sedikit', 'Hadap lurus, tersenyum'];
+var enrollD = [], enrollRun = false;
+function openEnroll() {
+  enrollD = []; showErr('e-err', ''); show('enroll'); renderDots(); $('e-shot').disabled = true;
+  $('e-st').className = 'chip w'; $('e-st').textContent = 'Memuat kamera dan model...';
+  enrollRun = true;
+  Promise.all([loadModels(), startCam($('e-vid'))]).then(function () { enrollLoop(); }).catch(function (e) { showErr('e-err', e.error); $('e-st').textContent = 'Gagal'; });
+}
+function renderDots() {
+  var d = $('e-dots').children;
+  for (var i = 0; i < d.length; i++) d[i].className = i < enrollD.length ? 'on' : '';
+  $('e-prompt').textContent = enrollD.length < 5 ? 'Foto ' + (enrollD.length + 1) + ' dari 5 - ' + PROMPTS[enrollD.length] : 'Menyimpan...';
+}
+function enrollLoop() {
+  if (!$('s-enroll').classList.contains('on') || !enrollRun) return;
+  detect($('e-vid'), false).then(function (r) {
+    var ok = faceOK(r, $('e-vid'));
+    $('e-cam').classList.toggle('ok', ok);
+    $('e-st').className = 'chip' + (ok ? '' : ' w');
+    $('e-st').textContent = ok ? 'Wajah terdeteksi' : 'Dekatkan wajah ke dalam lingkaran';
+    $('e-shot').disabled = !ok || enrollD.length >= 5;
+  }).catch(function () {}).then(function () { setTimeout(enrollLoop, 350); });
+}
+$('e-shot').onclick = function () {
+  $('e-shot').disabled = true;
+  detect($('e-vid'), true).then(function (r) {
+    if (!faceOK(r, $('e-vid'))) return showErr('e-err', 'Wajah tidak terbaca, coba lagi.');
+    showErr('e-err', '');
+    enrollD.push(Array.prototype.slice.call(r.descriptor)); renderDots();
+    if (enrollD.length >= 5) {
+      enrollRun = false;
+      api('enroll', { descriptors: enrollD }).then(function (me) { S.me = me; stopCam(); renderHome(); })
+        .catch(function (e) { showErr('e-err', e.error); enrollD = []; renderDots(); enrollRun = true; enrollLoop(); });
+    }
+  });
+};
+$('e-back').onclick = function () { enrollRun = false; stopCam(); openConsent(); };
+
+/* ============ beranda ============ */
+function tick() {
+  var d = new Date(), z = function (n) { return ('0' + n).slice(-2); };
+  $('h-time').textContent = z(d.getHours()) + '.' + z(d.getMinutes());
+  $('h-date').textContent = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function renderHome() {
+  var m = S.me;
+  $('h-hi').textContent = 'Halo,'; $('h-nama').textContent = m.nama; $('h-div').textContent = m.divisi + ' - ' + m.cfg.sppg;
+  $('h-shift').textContent = 'Shift ' + m.shift;
+  $('h-in').textContent = m.today.masuk || 'Belum absen'; $('h-out').textContent = m.today.pulang || 'Belum absen';
+  var done = m.today.masuk && m.today.pulang;
+  $('h-go').style.display = done ? 'none' : 'flex';
+  $('h-go-t').textContent = m.today.masuk ? 'Absen Pulang' : 'Absen Masuk';
+  $('h-manual').style.display = m.mode === 'manual' ? 'flex' : 'none';
+  showErr('h-err', '');
+  $('h-hist').innerHTML = (m.history.length ? m.history.map(function (h) {
+    return '<div class="card row sp" style="padding:10px 12px"><div><b style="font-size:13px">' + esc(h.tgl) + ' - ' + esc(h.tipe) + '</b><div class="sm-t">Shift ' + esc(h.shift) + ' - ' + esc(h.jam) + '</div></div><span class="chip ' + (h.status.indexOf('Menunggu') === 0 ? 'w' : '') + '">' + esc(h.status) + '</span></div>';
+  }).join('') : '<p>Belum ada riwayat.</p>');
+  show('home');
+}
+$('h-go').onclick = function () { startScan(S.me.today.masuk ? 'Pulang' : 'Masuk'); };
+
+/* ============ absen ============ */
+var geo = null;
+function getGeo() {
+  return new Promise(function (res, rej) {
+    if (!navigator.geolocation) return rej({ error: 'GPS tidak tersedia di perangkat ini.' });
+    navigator.geolocation.getCurrentPosition(function (p) { res({ lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) }); },
+      function () { rej({ error: 'Lokasi tidak terbaca. Aktifkan GPS dan izinkan akses lokasi.' }); }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
+  });
+}
+function step(id, st, txt) {
+  var e = $(id); e.style.border = st === 'on' ? '1.5px solid #E2BC63' : '0'; e.style.background = st === 'on' ? '#2B3658' : '#1E2740';
+  e.style.color = st === 'done' ? '#E2BC63' : (st === 'wait' ? '#B9C1D6' : '#fff'); if (txt) e.textContent = (st === 'done' ? '✓ ' : '') + txt;
+}
+function startScan(tipe) {
+  show('scan'); stopScan = false; geo = null;
+  showErr('x-err', ''); $('x-retry').style.display = 'none'; $('x-pb').style.width = '0';
+  $('x-sub').textContent = 'Absen ' + tipe + ' - Shift ' + S.me.shift;
+  step('x-s1', 'on', '1. Hadap lurus ke kamera'); step('x-s2', 'wait', '2. Gerakan keamanan'); step('x-s3', 'wait', '3. Verifikasi wajah');
+  $('x-geo').className = 'chip w'; $('x-geo').textContent = 'Mencari GPS...';
+  var geoP = getGeo().then(function (g) { geo = g; $('x-geo').className = 'chip'; $('x-geo').textContent = 'GPS +/-' + g.acc + ' m'; return g; })
+    .catch(function (e) { $('x-geo').className = 'chip b'; $('x-geo').textContent = 'GPS gagal'; throw e; });
+
+  if (S.me.mode === 'manual') { // tanpa wajah
+    $('x-title').textContent = 'Memeriksa lokasi...'; $('x-cam').style.display = 'none';
+    geoP.then(function () { submit(tipe, null); }).catch(function (e) { scanFail(e.error); });
+    return;
+  }
+  $('x-cam').style.display = '';
+  var challenge = ['kedip', 'kanan', 'kiri'][Math.floor(Math.random() * 3)];
+  var label = { kedip: 'Kedipkan mata dua kali', kanan: 'Tengok ke kanan', kiri: 'Tengok ke kiri' }[challenge];
+  Promise.all([loadModels(), startCam($('x-vid'))]).then(function () { return scanLoop(challenge, label); })
+    .then(function (res) { if (!res) return; step('x-s3', 'on', '3. Memeriksa wajah...'); return geoP.then(function () { return submit(tipe, res); }); })
+    .catch(function (e) { scanFail(e.error || 'Gagal.'); });
+}
+function scanLoop(challenge, label) {
+  var v = $('x-vid'), t0 = Date.now(), phase = 'front', front = 0, blinks = 0, closed = false, stable = 0, passedAt = 0;
+  $('x-title').textContent = 'Hadap lurus';
+  return new Promise(function (resolve, reject) {
+    (function loop() {
+      if (stopScan || !$('s-scan').classList.contains('on')) return resolve(null);
+      if (Date.now() - t0 > 30000) return reject({ error: 'Waktu habis. Coba lagi.' });
+      detect(v, false).then(function (r) {
+        var ok = faceOK(r, v); $('x-cam').classList.toggle('ok', ok);
+        if (!ok) { $('x-title').textContent = 'Posisikan wajah di lingkaran'; return; }
+        var y = yaw(r), frontal = y > 0.42 && y < 0.58;
+        if (phase === 'front') {
+          if (frontal) { front++; $('x-pb').style.width = '20%'; if (front >= 3) { phase = 'challenge'; step('x-s1', 'done', '1. Wajah terdeteksi'); step('x-s2', 'on', '2. ' + label); $('x-title').textContent = label; } }
+          else { front = 0; $('x-title').textContent = 'Hadap lurus ke kamera'; }
+        } else if (phase === 'challenge') {
+          var pass = false;
+          if (challenge === 'kedip') { var e = eyeEAR(r); if (e < 0.21) closed = true; else if (closed && e > 0.26) { closed = false; blinks++; } pass = blinks >= 2; }
+          else if (challenge === 'kanan') pass = y < 0.36;
+          else pass = y > 0.64;
+          $('x-pb').style.width = (pass ? 60 : 40) + '%';
+          if (pass) { phase = 'capture'; step('x-s2', 'done', '2. ' + label); $('x-title').textContent = 'Tahan, hadap lurus'; }
+        } else if (phase === 'capture') {
+          if (frontal) { stable++; if (stable >= 2) { phase = 'done'; return detect(v, true).then(function (rr) { if (!faceOK(rr, v)) { phase = 'capture'; stable = 0; return; } $('x-pb').style.width = '85%'; resolve({ descriptor: Array.prototype.slice.call(rr.descriptor), selfie: snap(v) }); }); } } else stable = 0;
+        }
+      }).catch(function () {}).then(function () { if (phase !== 'done') setTimeout(loop, 60); });
+    })();
+  });
+}
+function submit(tipe, res) {
+  var payload = { tipe: tipe, lat: geo ? geo.lat : null, lng: geo ? geo.lng : null, acc: geo ? geo.acc : null };
+  if (res) { payload.descriptor = res.descriptor; payload.selfie = res.selfie; payload.liveness = true; }
+  stopCam();
+  return api('absen', payload).then(function (r) {
+    S.me = r.me; $('x-pb').style.width = '100%';
+    var wait = r.status.indexOf('Menunggu') === 0;
+    $('d-title').textContent = 'Absen ' + r.tipe + (wait ? ' Tercatat' : ' Berhasil');
+    $('d-sub').textContent = wait ? 'Menunggu verifikasi koordinator.' : 'Terima kasih, ' + S.me.nama + '.';
+    $('d-kv').innerHTML = [['Waktu', r.jam + ' WIB'], ['Shift', r.shift], ['Lokasi', r.jarak !== '' ? 'Dalam area (' + r.jarak + ' m)' : 'Tercatat'], ['Wajah', r.wajah ? '<span class="chip">Terverifikasi</span>' : '<span class="chip w">Tanpa wajah</span>']]
+      .map(function (a) { return '<div class="kv"><span>' + a[0] + '</span><span>' + a[1] + '</span></div>'; }).join('');
+    show('done');
+  }).catch(function (e) { scanFail(e.error); });
+}
+function scanFail(m) {
+  stopCam(); showErr('x-err', m); $('x-title').textContent = 'Belum berhasil'; $('x-retry').style.display = 'flex';
+  $('x-retry').onclick = function () { startScan(S.me.today.masuk ? 'Pulang' : 'Masuk'); };
+}
+$('x-close').onclick = function () { stopScan = true; renderHome(); };
+$('d-ok').onclick = function () { renderHome(); };
+
+/* ============ profil ============ */
+function renderProf() {
+  var m = S.me;
+  $('p-kv').innerHTML = [['Nama', esc(m.nama)], ['ID', esc(m.id)], ['Divisi', esc(m.divisi)], ['Data wajah', m.consent.face ? (m.hasFace ? '<span class="chip">Terdaftar</span>' : '<span class="chip w">Belum</span>') : '<span class="chip w">Tidak diproses</span>'],
+    ['Foto selfie', m.consent.selfie ? 'Disimpan ' + m.cfg.selfieHari + ' hari' : 'Tidak disimpan'], ['Persetujuan', esc(m.consentAt || '-')], ['Kontak admin', esc(m.cfg.kontak || '-')]]
+    .map(function (a) { return '<div class="kv"><span>' + a[0] + '</span><span style="text-align:right">' + a[1] + '</span></div>'; }).join('');
+  $('p-withdraw').style.display = m.consent.face ? 'flex' : 'none';
+  showErr('p-err', ''); show('prof');
+}
+$('p-withdraw').onclick = function () {
+  if (!confirm('Template wajah Anda akan dihapus dan absen beralih ke mode manual (verifikasi koordinator). Lanjutkan?')) return;
+  api('withdraw').then(function (me) { S.me = me; renderProf(); alert('Persetujuan wajah ditarik dan template wajah dihapus.'); }).catch(function (e) { showErr('p-err', e.error); });
+};
+$('p-send').onclick = function () {
+  api('request', { jenis: $('p-jenis').value, catatan: $('p-cat').value }).then(function (r) { $('p-cat').value = ''; alert('Permintaan terkirim. Ditanggapi paling lambat ' + r.batas + '.'); }).catch(function (e) { showErr('p-err', e.error); });
+};
+$('p-out').onclick = function () { doLogout(); };
+
+/* ============ navigasi bawah ============ */
+document.querySelectorAll('#nav button').forEach(function (b) {
+  b.onclick = function () { var g = b.getAttribute('data-go'); if (g === 'home') renderHome(); else if (g === 'prof') renderProf(); else openAdmin(); };
+});
+
+/* ============ admin ============ */
+var aTab = 'today', aIsAdmin = false;
+function openAdmin() {
+  aIsAdmin = S.me.role === 'admin';
+  document.querySelectorAll('#a-tabs button').forEach(function (b) { b.style.display = (b.getAttribute('data-admin') && !aIsAdmin) ? 'none' : ''; });
+  show('admin'); loadTab(aTab);
+}
+document.querySelectorAll('#a-tabs button').forEach(function (b) { b.onclick = function () { loadTab(b.getAttribute('data-t')); }; });
+function loadTab(t) {
+  aTab = t; showErr('a-err', '');
+  document.querySelectorAll('#a-tabs button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-t') === t); });
+  var fn = { today: tabToday, users: tabUsers, req: tabReq, cfg: tabCfg }[t]; fn();
+}
+function aErr(e) { showErr('a-err', e.error || 'Gagal.'); }
+function act(action, payload, okMsg) {
+  return api(action, payload).then(function (r) { if (okMsg) alert(okMsg(r)); loadTab(aTab); }).catch(aErr);
+}
+
+function tabToday() {
+  api('adminToday').then(function (r) {
+    var h = '<div class="sum"><div class="card"><b>' + r.ringkas.hadir + '/' + r.ringkas.total + '</b><span>Hadir</span></div><div class="card"><b>' + r.ringkas.menunggu + '</b><span>Menunggu</span></div></div>';
+    h += '<h2>Absensi ' + esc(r.tanggal) + '</h2>';
+    h += r.rows.length ? r.rows.map(function (x) {
+      var cls = x.status.indexOf('Gagal') === 0 ? 'b' : (x.status.indexOf('Menunggu') === 0 ? 'w' : '');
+      var btn = '';
+      if (x.status === 'Menunggu verifikasi') btn += '<button class="btn sm" data-ap="' + x.row + '">Setujui</button>';
+      if (x.selfie && r.canSelfie) btn += '<button class="btn sm sec" data-sf="' + x.row + '">Foto</button>';
+      return '<div class="card col" style="gap:6px"><div class="row sp"><b style="font-size:14px">' + esc(x.nama) + '</b><span class="chip ' + cls + '">' + esc(x.status) + '</span></div><div class="sm-t">' + esc(x.divisi) + ' - ' + esc(x.tipe) + ' ' + esc(x.jam) + (x.jarak !== '' ? ' - ' + esc(x.jarak) + ' m' : '') + (x.skor !== '' ? ' - skor ' + esc(x.skor) : '') + '</div>' + (btn ? '<div class="row">' + btn + '</div>' : '') + '</div>';
+    }).join('') : '<p>Belum ada absensi.</p>';
+    h += '<h2>Belum absen masuk (' + r.belum.length + ')</h2><div class="card sm-t">' + (r.belum.length ? r.belum.map(function (b) { return esc(b.nama) + ' (' + esc(b.divisi) + ')'; }).join(', ') : 'Semua sudah absen.') + '</div>';
+    $('a-body').innerHTML = h;
+    document.querySelectorAll('[data-ap]').forEach(function (b) { b.onclick = function () { act('adminApprove', { row: b.getAttribute('data-ap') }); }; });
+    document.querySelectorAll('[data-sf]').forEach(function (b) { b.onclick = function () { api('adminSelfie', { row: b.getAttribute('data-sf') }).then(function (s) { $('mod-body').innerHTML = '<img src="' + s.img + '" alt="Selfie absen"><p style="margin-top:6px">' + esc(s.info) + '</p>'; $('mod').classList.add('on'); }).catch(aErr); }; });
+  }).catch(aErr);
+}
+$('mod-x').onclick = function () { $('mod').classList.remove('on'); $('mod-body').innerHTML = ''; };
+
+function tabUsers() {
+  api('adminUsers').then(function (r) {
+    var h = '';
+    if (r.isAdmin) h += '<div class="card col"><h2>Tambah relawan</h2><input type="text" id="n-id" placeholder="ID (mis. RW001)"><input type="text" id="n-nama" placeholder="Nama lengkap"><input type="text" id="n-div" placeholder="Divisi"><input type="tel" id="n-pin" maxlength="6" placeholder="PIN awal 6 angka"><select id="n-role"><option value="relawan">Relawan</option><option value="koordinator">Koordinator</option><option value="admin">Admin</option></select><button class="btn" id="n-add">Tambah</button></div>';
+    h += r.users.map(function (u) {
+      var b = '<button class="btn sm sec" data-m="' + u.id + '">Absen manual</button>';
+      if (r.isAdmin) b += '<button class="btn sm sec" data-rd="' + u.id + '">Reset HP</button><button class="btn sm sec" data-rp="' + u.id + '">Reset PIN</button><button class="btn sm sec" data-rf="' + u.id + '">Reset wajah</button><button class="btn sm danger" data-db="' + u.id + '">Hapus data biometrik</button><button class="btn sm sec" data-st="' + u.id + '|' + u.status + '">' + (u.status === 'Aktif' ? 'Nonaktifkan' : 'Aktifkan') + '</button>';
+      return '<div class="card col" style="gap:8px"><div class="row sp"><b style="font-size:14px">' + esc(u.nama) + '</b><span class="chip ' + (u.status === 'Aktif' ? '' : 'b') + '">' + esc(u.status) + '</span></div><div class="sm-t">' + esc(u.id) + ' - ' + esc(u.divisi) + ' - ' + esc(u.role) + '</div><div class="row" style="flex-wrap:wrap"><span class="chip ' + (u.device ? '' : 'w') + '">' + (u.device ? 'HP terikat' : 'HP belum terikat') + '</span><span class="chip ' + (u.wajah ? '' : 'w') + '">' + (u.wajah ? 'Wajah terdaftar' : (u.consentFace ? 'Wajah belum didaftar' : 'Tanpa wajah')) + '</span></div><div class="row" style="flex-wrap:wrap">' + b + '</div></div>';
+    }).join('');
+    $('a-body').innerHTML = h;
+    if ($('n-add')) $('n-add').onclick = function () { act('adminAddUser', { id: $('n-id').value, nama: $('n-nama').value, divisi: $('n-div').value, pin: $('n-pin').value, role: $('n-role').value }, function () { return 'Relawan ditambahkan.'; }); };
+    var on = function (sel, fn) { document.querySelectorAll(sel).forEach(function (b) { b.onclick = function () { fn(b); }; }); };
+    on('[data-m]', function (b) { var t = prompt('Tipe absen manual: Masuk atau Pulang', 'Masuk'); if (!t) return; var c = prompt('Catatan (alasan)', ''); act('adminManual', { id: b.getAttribute('data-m'), tipe: t, catatan: c || '' }); });
+    on('[data-rd]', function (b) { if (confirm('Reset perangkat? Relawan bisa masuk dari HP baru.')) act('adminResetDevice', { id: b.getAttribute('data-rd') }); });
+    on('[data-rp]', function (b) { var p = prompt('PIN baru (6 angka)'); if (p) act('adminResetPin', { id: b.getAttribute('data-rp'), pin: p }, function () { return 'PIN diubah.'; }); });
+    on('[data-rf]', function (b) { if (confirm('Hapus template wajah? Relawan harus mendaftar ulang.')) act('adminResetFace', { id: b.getAttribute('data-rf') }); });
+    on('[data-db]', function (b) { if (confirm('HAPUS template wajah dan SEMUA foto selfie relawan ini, serta tarik persetujuan wajahnya? Tidak bisa dibatalkan.')) act('adminDeleteBio', { id: b.getAttribute('data-db') }, function (r) { return 'Selesai. Foto selfie dihapus: ' + r.selfieDihapus; }); });
+    on('[data-st]', function (b) { var a = b.getAttribute('data-st').split('|'); act('adminSetStatus', { id: a[0], status: a[1] === 'Aktif' ? 'Nonaktif' : 'Aktif' }); });
+  }).catch(aErr);
+}
+
+function tabReq() {
+  api('adminRequests').then(function (r) {
+    $('a-body').innerHTML = (r.list.length ? r.list.map(function (x) {
+      return '<div class="card col" style="gap:6px"><div class="row sp"><b style="font-size:14px">' + esc(x.nama) + ' (' + esc(x.id) + ')</b><span class="chip ' + (x.status === 'Selesai' ? '' : 'w') + '">' + esc(x.status) + '</span></div><div style="font-size:13px;font-weight:700">' + esc(x.jenis) + '</div><div class="sm-t">' + esc(x.catatan || '-') + '</div><div class="sm-t">Diajukan ' + esc(x.waktu) + ' - batas ' + esc(x.batas) + '</div>' + (x.status !== 'Selesai' ? '<button class="btn sm" data-rs="' + x.row + '">Tandai selesai</button>' : '') + '</div>';
+    }).join('') : '<p>Belum ada permintaan.</p>');
+    document.querySelectorAll('[data-rs]').forEach(function (b) { b.onclick = function () { act('adminResolve', { row: b.getAttribute('data-rs') }); }; });
+  }).catch(aErr);
+}
+
+function tabCfg() {
+  api('adminGetConfig').then(function (r) {
+    $('a-body').innerHTML = '<div class="card col">' + r.config.map(function (c) {
+      return '<label class="f">' + esc(c.k) + '<input type="text" data-k="' + esc(c.k) + '" value="' + esc(c.v) + '"><span class="sm-t" style="font-weight:500">' + esc(c.ket) + '</span></label>';
+    }).join('') + '<button class="btn" id="cfg-save">Simpan pengaturan</button></div>';
+    $('cfg-save').onclick = function () {
+      var v = {}; document.querySelectorAll('[data-k]').forEach(function (i) { v[i.getAttribute('data-k')] = i.value; });
+      act('adminSetConfig', { values: v }, function () { return 'Tersimpan.'; });
+    };
+  }).catch(aErr);
+}
+
+boot();
+</script>
+</body>
+</html>
